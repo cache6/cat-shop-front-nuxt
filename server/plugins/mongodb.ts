@@ -1,31 +1,40 @@
-import { MongoClient, ServerApiVersion } from 'mongodb'
+import { MongoClient, Db, ServerApiVersion } from 'mongodb'
 
-// Ensure MONGODB_URI is a string, if not throw an error
 const MONGODB_URI = process.env.MONGODB_URI
 if (typeof MONGODB_URI !== 'string') {
     throw new Error('MONGODB_URI is not defined or is not a string.')
 }
 
-// Create a MongoClient with a MongoClientOptions object to set the Stable API version
-const client = new MongoClient(MONGODB_URI, {
-    serverApi: {
-        version: ServerApiVersion.v1,
-        strict: true,
-        deprecationErrors: true,
-    }
-});
+let cachedClient: MongoClient | null = null;
+let cachedDb: Db | null = null;
 
-export default async function run() {
-    try {
-        // Connect the client to the server	(optional starting in v4.7)
-        await client.connect()
-        // Send a ping to confirm a successful connection
-        await client.db("admin").command({ ping: 1 })
-        console.log("Pinged your deployment. You successfully connected to MongoDB!")
-    } catch (error) {
-        console.error("Failed to connect to MongoDB", error);
-        throw error; // Rethrow after logging
+// MongoDB에 연결하고, 연결된 데이터베이스 객체와 클라이언트를 반환하는 함수
+export async function connectToDatabase() {
+    if (cachedClient && cachedDb) {
+        return { db: cachedDb, client: cachedClient };
     }
-    // Consider when and how you want to close the connection
+
+    const client = new MongoClient(process.env.MONGODB_URI!, {
+        serverApi: ServerApiVersion.v1,
+    });
+
+    await client.connect();
+    const db = client.db(process.env.DB_NAME);
+
+    cachedClient = client;
+    cachedDb = db;
+
+    return { db, client };
 }
-run().catch(console.dir)
+
+export default connectToDatabase;
+
+// 이 함수는 예제로 제공되며, 실제 사용 시에는 필요에 따라 수정하거나 제거할 수 있습니다.
+async function run() {
+    try {
+        await connectToDatabase();
+    } catch (error) {
+        console.error("Database connection failed", error);
+    }
+}
+run().catch(console.dir);

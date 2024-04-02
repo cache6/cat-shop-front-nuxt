@@ -1,10 +1,42 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
+
+const inputData = ref('')
+
+async function sendData() {
+    if (!inputData.value) {
+        console.error('입력 데이터가 없습니다');
+        return;
+    }
+
+    try {
+        console.log('데이터를 전송합니다:', inputData.value);
+        const response = await fetch('/api/data', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ content: inputData.value }),
+        });
+        console.log('response:', response);
+
+        if (!response.ok) {
+            throw new Error('데이터 전송 실패');
+        }
+
+        const data = await response.json();
+        console.log('데이터가 성공적으로 전송되었습니다:', data);
+        inputData.value = ''; // 데이터를 성공적으로 전송한 후 inputData를 초기화합니다.
+    } catch (error) {
+        console.error('데이터 전송 오류:', error);
+    }
+}
 </script>
 
 <template>
-    <div class="flex min-h-screen w-full flex-col">
+    <!-- <div class="flex min-h-screen w-full flex-col">
         <header class="sticky top-0 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
             <nav
                 class="hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
@@ -84,16 +116,16 @@ import { Button } from '@/components/ui/button'
                     </DropdownMenuContent>
                 </DropdownMenu>
             </div>
-        </header>
-        <main class="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
-            <div>
-                <h1 class="text-3xl font-semibold">Write</h1>
-            </div>
-            <div>
-                <Textarea placeholder="Write something..." />
-                <Button>Submit</Button>
-            </div>
+        </header> -->
+    <main class="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
+        <div>
+            <h1 class="text-3xl font-semibold">Write</h1>
+        </div>
+        <div>
+            <Textarea v-model="inputData" placeholder="Write something..." />
+            <Button @click="sendData">Submit</Button>
+        </div>
 
-        </main>
-    </div>
+    </main>
+    <!-- </div> -->
 </template>

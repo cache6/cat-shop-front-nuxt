@@ -16,6 +16,7 @@
     "clsx": "^2.1.0",
     "embla-carousel": "^8.0.0",
     "embla-carousel-vue": "^8.0.0",
+    "express": "^4.19.2",
     "lucide-vue-next": "^0.363.0",
     "mongodb": "^6.5.0",
     "nitropack": "^2.9.5",

@@ -71,9 +71,8 @@ const invoices = [
     },
 ]
 
-function handleClick(invoice) {
+function handleClick(invoice: { invoice: string; paymentStatus: string; totalAmount: string; paymentMethod: string }) {
     console.log('clicked', invoice)
-    // Your click handling logic here
 }
 
 
@@ -203,7 +202,6 @@ function handleClick(invoice) {
                     </TableBody>
                 </Table>
             </div>
-
         </main>
     </div>
 
