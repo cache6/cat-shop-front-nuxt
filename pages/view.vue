@@ -1,9 +1,39 @@
 <script setup lang="ts">
+import { useRoute } from 'vue-router';
+import { onMounted, ref } from 'vue';
 
+function showAlert() {
+    // 얼럿창을 띄우는 코드
+    alert('구현 예정');
+}
+
+interface Invoice {
+    _id: string;
+    inputData: string;
+    createdAt: string;
+    author: string;
+    title: string;
+    // Add other properties as needed
+}
+
+const route = useRoute();
+const id = route.params.id as string;
+const invoice = ref<Invoice | null>(null);
+const error = ref<string | null>(null);
+
+// 데이터를 가져오는 로직을 별도의 함수로 분리
+async function fetchInvoice() {
+    try {
+        invoice.value = await $fetch(`/api/view/${id}`) as any; // or a more specific type if known
+    } catch (err) {
+        error.value = '데이터를 가져오는 중 오류가 발생했습니다.';
+    }
+}
+
+onMounted(fetchInvoice);
 </script>
 
 <template>
-
     <div class="flex min-h-screen w-full flex-col">
         <header class="sticky top-0 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
             <nav
@@ -86,17 +116,30 @@
             </div>
         </header>
         <main class="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
-            <div class="flex justify-end gap-4">
-                <Button variant="outline">수정</Button>
-                <Button variant="outline">삭제</Button>
+            <div class="flex justify-end">
+                <Button @click="showAlert" variant="outline">
+                    <NuxtLink to="">
+                        수정</NuxtLink>
+                </Button>
+                <Button @click="showAlert" variant="outline">
+                    <NuxtLink to="">
+                        삭제</NuxtLink>
+                </Button>
             </div>
-            <div class="flex flex-col gap-4">
-                <h1 class="text-3xl font-semibold">제목</h1>
-                <span class="text-muted-foreground">작성자</span>
-                <span class="text-muted-foreground">2024-01-01</span>
+            <div class="flex flex-col  px-20" v-if="invoice">
+                <div class="flex flex-row items-center w-full">
+                    <div class="flex-1"></div>
+                    <div class="flex-1 text-3xl font-bold my-4 font-semibold justify-between text-center"> {{
+                    invoice.title }}
+                    </div>
+                    <div class="flex-1 text-muted-foreground my-6 text-right"> {{ invoice.author }} / {{
+                    invoice.createdAt }}
+                    </div>
+                </div>
+                <span class="flex text-muted-foreground justify-center"> {{ invoice.inputData }}</span>
             </div>
-            <div>
-                내용
+            <div v-else-if="error">
+                {{ error }}
             </div>
 
         </main>

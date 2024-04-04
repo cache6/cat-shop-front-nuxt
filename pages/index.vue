@@ -1,78 +1,26 @@
 <script setup lang="ts">
 import { Activity, ArrowUpRight, CircleUser, CreditCard, DollarSign, Menu, Package2, Search, Users } from 'lucide-vue-next'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel'
-import {
-    ContextMenu,
-    ContextMenuCheckboxItem,
-    ContextMenuContent,
-    ContextMenuItem,
-    ContextMenuLabel,
-    ContextMenuRadioGroup,
-    ContextMenuRadioItem,
-    ContextMenuSeparator,
-    ContextMenuShortcut,
-    ContextMenuSub,
-    ContextMenuSubContent,
-    ContextMenuSubTrigger,
-    ContextMenuTrigger,
-} from '@/components/ui/context-menu'
 import { Input } from '@/components/ui/input'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableCaption } from '@/components/ui/table'
 
+interface Invoice {
+    _id: string;
+    inputData: string;
+    title: string;
+    createdAt: string;
+    author: string;
+}
 
-const invoices = [
-    {
-        invoice: '1',
-        paymentStatus: '판매중',
-        totalAmount: '$250.00',
-        paymentMethod: '고양이 용품1',
-    },
-    {
-        invoice: '2',
-        paymentStatus: '판매중',
-        totalAmount: '$150.00',
-        paymentMethod: '고양이 용품2',
-    },
-    {
-        invoice: '3',
-        paymentStatus: '판매중',
-        totalAmount: '$350.00',
-        paymentMethod: '고양이 용품3',
-    },
-    {
-        invoice: '4',
-        paymentStatus: '판매중',
-        totalAmount: '$450.00',
-        paymentMethod: '고양이 용품4',
-    },
-    {
-        invoice: '5',
-        paymentStatus: '판매중',
-        totalAmount: '$550.00',
-        paymentMethod: '고양이 용품5',
-    },
-    {
-        invoice: '6',
-        paymentStatus: '판매중',
-        totalAmount: '$200.00',
-        paymentMethod: '고양이 용품6',
-    },
-    {
-        invoice: '7',
-        paymentStatus: '판매중',
-        totalAmount: '$300.00',
-        paymentMethod: '고양이 용품7',
-    },
-]
+const { data: invoices, error, refresh } = await useAsyncData<Invoice[]>('invoices', async () => {
+    const result = await $fetch('/api/list');
+    return result as unknown as Invoice[];
+});
 
-function handleClick(invoice: { invoice: string; paymentStatus: string; totalAmount: string; paymentMethod: string }) {
-    console.log('clicked', invoice)
+function handleClick(invoice: Invoice) {
+    // console.log('clicked', invoice)
 }
 
 
@@ -174,32 +122,33 @@ function handleClick(invoice: { invoice: string; paymentStatus: string; totalAmo
                     <TableHeader>
                         <TableRow>
                             <TableHead class="w-[100px]">
-                                번호
+                                작성일
                             </TableHead>
-                            <TableHead>상태</TableHead>
                             <TableHead>제목</TableHead>
+                            <TableHead>내용</TableHead>
                             <TableHead class="text-right">
-                                가격
+                                작성자
                             </TableHead>
                         </TableRow>
                     </TableHeader>
-                    <TableBody>
 
-                        <TableRow @click="() => handleClick(invoice)" v-for="invoice in invoices"
-                            :key="invoice.invoice">
+                    <TableBody>
+                        <TableRow @click="() => handleClick(invoice)" v-for="invoice in invoices" :key="invoice._id">
                             <TableCell class="font-medium">
-                                {{ invoice.invoice }}
+                                {{ invoice.createdAt }}
                             </TableCell>
-                            <TableCell>{{ invoice.paymentStatus }}</TableCell>
                             <TableCell>
-                                <NuxtLink to="/view">{{ invoice.paymentMethod }}</NuxtLink>
+                                {{ invoice.title }}
+                            </TableCell>
+                            <TableCell>
+                                <NuxtLink :to="`/view/${invoice._id}`">{{ invoice.inputData }}</NuxtLink>
                             </TableCell>
                             <TableCell class="text-right">
-                                {{ invoice.totalAmount }}
+                                {{ invoice.author }}
                             </TableCell>
                         </TableRow>
-
                     </TableBody>
+
                 </Table>
             </div>
         </main>
