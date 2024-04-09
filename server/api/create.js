@@ -29,7 +29,6 @@ export default defineEventHandler(async (event) => {
         };
 
         const result = await coll.insertOne(document);
-        console.log('Document inserted with ID:', result.insertedId);
         return { success: true, id: result.insertedId };
     } catch (error) {
         console.error('Error in /api/create:', error);

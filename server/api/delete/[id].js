@@ -1,5 +1,6 @@
-import { connectToDatabase } from "../plugins/mongodb";
+import { connectToDatabase } from "../../plugins/mongodb";
 import { ObjectId } from 'mongodb';
+import { send } from 'h3';
 
 export default defineEventHandler(async (event) => {
     const params = event.context.params;
@@ -13,20 +14,23 @@ export default defineEventHandler(async (event) => {
     try {
         const { db } = await connectToDatabase();
         const coll = db.collection(process.env.COLLECTION_NAME);
-        console.log('Connected to database');
 
         if (!id) {
             return createError({ statusCode: 400, statusMessage: 'ID parameter is required' });
         }
 
         const objectId = new ObjectId(String(id));
-        const invoice = await coll.findOne({ _id: objectId });
+        const invoice = await coll.deleteOne({ _id: objectId });
 
-        // 조회된 데이터를 반환합니다.
-        return invoice;
+        if (!invoice) {
+            return createError({ statusCode: 404, statusMessage: 'Invoice not found' });
+        }
+
+        // 객체를 JSON 문자열로 변환하여 전송
+        return send(event, JSON.stringify(invoice), 'application/json');
     } catch (error) {
         console.error('Error fetching invoices:', error);
         return createError({ statusCode: 500, statusMessage: 'Database query error' });
     }
-});
 
+});

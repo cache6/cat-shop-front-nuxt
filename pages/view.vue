@@ -1,11 +1,6 @@
 <script setup lang="ts">
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { onMounted, ref } from 'vue';
-
-function showAlert() {
-    // 얼럿창을 띄우는 코드
-    alert('구현 예정');
-}
 
 interface Invoice {
     _id: string;
@@ -21,6 +16,8 @@ const id = route.params.id as string;
 const invoice = ref<Invoice | null>(null);
 const error = ref<string | null>(null);
 
+const router = useRouter();
+
 // 데이터를 가져오는 로직을 별도의 함수로 분리
 async function fetchInvoice() {
     try {
@@ -31,6 +28,26 @@ async function fetchInvoice() {
 }
 
 onMounted(fetchInvoice);
+
+async function sendDeleteData() {
+    try {
+        const response = await fetch(`/api/delete/${id}`, {
+            method: 'DELETE',
+        });
+
+        if (!response.ok) {
+            throw new Error('데이터 삭제 실패');
+        }
+
+        const data = await response.json();
+        console.log('데이터가 성공적으로 삭제되었습니다:', data);
+
+        router.push('/');
+    } catch (error) {
+        console.error('데이터 삭제 오류:', error);
+    }
+
+}
 </script>
 
 <template>
@@ -117,11 +134,11 @@ onMounted(fetchInvoice);
         </header>
         <main class="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
             <div class="flex justify-end">
-                <Button @click="showAlert" variant="outline">
-                    <NuxtLink to="">
+                <Button variant="outline">
+                    <NuxtLink :to="`/update/${invoice?._id}`">
                         수정</NuxtLink>
                 </Button>
-                <Button @click="showAlert" variant="outline">
+                <Button @click="sendDeleteData" variant="outline">
                     <NuxtLink to="">
                         삭제</NuxtLink>
                 </Button>
@@ -130,10 +147,10 @@ onMounted(fetchInvoice);
                 <div class="flex flex-row items-center w-full">
                     <div class="flex-1"></div>
                     <div class="flex-1 text-3xl font-bold my-4 font-semibold justify-between text-center"> {{
-                    invoice.title }}
+                        invoice.title }}
                     </div>
                     <div class="flex-1 text-muted-foreground my-6 text-right"> {{ invoice.author }} / {{
-                    invoice.createdAt }}
+                        invoice.createdAt }}
                     </div>
                 </div>
                 <span class="flex text-muted-foreground justify-center"> {{ invoice.inputData }}</span>

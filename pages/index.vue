@@ -23,7 +23,6 @@ function handleClick(invoice: Invoice) {
     // console.log('clicked', invoice)
 }
 
-
 </script>
 
 <template>
